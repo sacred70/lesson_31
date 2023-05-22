@@ -24,12 +24,16 @@ class AdSerializer(ModelSerializer):
     class Meta:
         model = Ad
         fields = '__all__'
+
+
 class AdCreateSerializer(ModelSerializer):
     category = SlugRelatedField(slug_field="name", many=True, queryset=Category.objects.all())
     author = SlugRelatedField(slug_field="username", many=True, queryset=User.objects.all())
+
     class Meta:
         model = Ad
         fields = '__all__'
+
 
 class AdListSerializer(ModelSerializer):
     category = SlugRelatedField(slug_field="name", many=True, queryset=Category.objects.all())
@@ -61,11 +65,11 @@ class SelectionSerializer(ModelSerializer):
 
 class SelectionCreateSerializer(ModelSerializer):
     owner = SlugRelatedField(slug_field="username", read_only=True)
+
     def create(self, validated_data):
         request = self.context.get("request")
         validated_data["owner"] = request.user
         return super().create(validated_data)
-
 
     class Meta:
         model = Selection
