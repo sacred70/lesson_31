@@ -3,18 +3,28 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import UpdateView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from ads.models import Ad, Category
-from ads.serializers import AdSerializer, AdListSerializer, AdDetailSerializer
-
-
-
+from ads.permissions import IsOwner, IsStaff
+from ads.serializers import AdSerializer, AdListSerializer, AdDetailSerializer, AdCreateSerializer
 
 
 class AdViewSet(ModelViewSet):
     queryset = Ad.objects.all().order_by("-price")
-    serializers = {"list": AdListSerializer, "retrieve": AdDetailSerializer}
+    serializers = {"list": AdListSerializer, "retrieve": AdDetailSerializer, 'create': AdCreateSerializer}
     default_serializer = AdSerializer
+    permission = {"retrieve": [IsAuthenticated],
+                  "create": [IsAuthenticated],
+                  "update": [IsOwner | IsStaff],
+                  "destroy": [IsOwner | IsStaff],
+                  "partial_update": [IsOwner | IsStaff]}
+
+    default_permission = [AllowAny]
+
+    def get_permission(self):
+        self.permission_classes = self.permission.get(self.action, self.default_permission)
+        return super().get_permissions()
 
     def get_serialize_class(self):
         return self.serializers.get(self.action, self.default_serializer)
