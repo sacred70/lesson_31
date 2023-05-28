@@ -1,3 +1,4 @@
+from django.core.validators import MinLengthValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
@@ -5,7 +6,7 @@ from users.models import User
 
 
 class Ad(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, validators=[MinLengthValidator(5)])
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     price = models.PositiveIntegerField()
     description = models.TextField()
@@ -36,6 +37,7 @@ class Selection(models.Model):
 
 
 class Category(models.Model):
+    slug = models.SlugField(max_length=10, validators=[MinLengthValidator(5)])
     name = models.CharField(max_length=200)
 
     class Meta:
